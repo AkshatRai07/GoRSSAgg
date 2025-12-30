@@ -19,7 +19,7 @@ func startScraping(
 ) {
 	log.Printf("Scraping on %v goroutines every %s duration", concurrency, timeBetweenRequest)
 	ticker := time.NewTicker(timeBetweenRequest)
-	for ; ; <- ticker.C {
+	for ; ; <-ticker.C {
 		feeds, err := db.GetNextFeedsToFetch(
 			context.Background(),
 			int32(concurrency),
@@ -68,14 +68,14 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 		}
 
 		_, err = db.CreatePost(context.Background(), database.CreatePostParams{
-			ID: uuid.New(),
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-			Title: item.Title,
+			ID:          uuid.New(),
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+			Title:       item.Title,
 			Description: description,
 			PublishedAt: pubAt,
-			Url: item.Link,
-			FeedID: feed.ID,
+			Url:         item.Link,
+			FeedID:      feed.ID,
 		})
 		if err != nil {
 			if strings.Contains(err.Error(), "duplicate key") {
